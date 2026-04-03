@@ -1,0 +1,684 @@
+# SINGLE MASTER PROMPT: LIBRARY MANAGEMENT SYSTEM with Java Backend, RBAC & Competitive Exam Categories
+
+Copy and paste the ENTIRE prompt below into your AI assistant (ChatGPT, Claude, Gemini, Copilot, etc.) to generate all artifacts.
+
+---
+
+```
+You are a senior product manager, software architect, and full-stack engineer. Generate a complete Library Management System (LMS) project titled "LIBEREY MENGENMNT SYSTEMPROJECT" with Java Spring Boot backend, role-based access control (RBAC), and comprehensive book categorization including competitive exams (SSC, UPSC, CAT, etc.). Produce ALL artifacts listed below in a single response.
+
+## PROJECT OVERVIEW
+
+**Project Name:** LIBEREY MENGENMNT SYSTEMPROJECT (Library Management System - LMS)
+
+**Tech Stack:**
+- Backend: Java 17, Spring Boot 3.x, Spring Security, Spring Data JPA, PostgreSQL, JWT, Maven
+- Frontend: REST API (React/Any frontend can consume)
+- Notifications: JavaMailSender (email), Twilio (SMS - optional)
+- Testing: JUnit 5, Mockito, TestContainers, Spring Boot Test
+- CI/CD: GitHub Actions
+
+**Target Users (6 Roles with RBAC):**
+
+| Role | Permissions | Max Books | Loan Duration | Renewals |
+|------|-------------|-----------|---------------|----------|
+| ROLE_ADMIN | Full system access, audit logs, user management | N/A | N/A | N/A |
+| ROLE_LIBRARIAN | Catalog management, checkout/return, reports, override | N/A | N/A | N/A |
+| ROLE_COLLEGE_STUDENT | Search, borrow, renew, holds | 5 | 21 days | 1 time |
+| ROLE_SCHOOL_STUDENT | Search, borrow, renew (parent approval) | 3 | 14 days | 1 time |
+| ROLE_FACULTY | Search, borrow, renew, recommend books | 10 | 30 days | 2 times |
+| ROLE_GENERAL_PATRON | Search, borrow, renew | 4 | 21 days | 1 time |
+
+## BOOK CATEGORY HIERARCHY (ENUM STRUCTURE)
+
+```
+MAIN_CATEGORY with Subcategories:
+
+1. COMPETITIVE_EXAM
+   - SSC, UPSC, CAT, GATE, NEET, JEE, BANKING, RAILWAY, OTHER_EXAM
+
+2. COLLEGE
+   - ENGINEERING, MEDICAL, COMMERCE, ARTS, LAW, MANAGEMENT, RESEARCH
+
+3. SCHOOL
+   - K_5 (Grades K-5), GRADE_6_8, GRADE_9_10, GRADE_11_12
+
+4. COMIC
+   - SUPERHERO, MANGA, GRAPHIC_NOVEL, HUMOR
+
+5. HISTORY
+   - ANCIENT, MEDIEVAL, MODERN, WORLD, REGIONAL
+
+6. NON_FICTION
+   - BIOGRAPHY, SCIENCE, SELF_HELP, TRAVEL, BUSINESS, HEALTH
+
+7. FICTION
+   - LITERARY, SCI_FI, FANTASY, MYSTERY, ROMANCE, HORROR
+
+8. OTHER
+   - MAGAZINE, JOURNAL, REFERENCE, AUDIOBOOK
+```
+
+## ARTIFACTS TO GENERATE (17 Total)
+
+Generate each artifact with clear separator: `=== ARTIFACT X: filename ===`
+
+---
+
+### ARTIFACT 1: BookCategory.java (Enum with Validation)
+**Filename:** `com/lms/model/enums/BookCategory.java`
+
+**Content:**
+```java
+// MainCategory enum with 8 values
+// SubCategory enums (separate or nested)
+// Helper methods:
+// - public static boolean isValidSubcategory(MainCategory main, String sub)
+// - public static List<String> getAllowedSubcategories(MainCategory main)
+// - public static MainCategory fromString(String category)
+// - public String getDisplayName()
+```
+
+---
+
+### ARTIFACT 2: Database Schema (PostgreSQL DDL)
+**Filename:** `schema.sql`
+
+**Tables to create:**
+```sql
+-- 1. users (id, email, password_hash, name, phone, role, college_name, school_grade, parent_email, created_at, updated_at, deleted_at)
+-- 2. books (id, title, author, isbn, main_category, sub_category, publication_year, publisher, edition, total_copies, available_copies, location_shelf, language, is_reference_only)
+-- 3. loans (id, book_id, user_id, checkout_date, due_date, returned_date, fine_amount, renewed_count, approved_by)
+-- 4. reservations (id, book_id, user_id, created_date, status, expiry_date)
+-- 5. fines (id, loan_id, amount, paid_status, paid_date)
+-- 6. audit_logs (id, user_id, action, entity_type, entity_id, old_value, new_value, ip_address, timestamp)
+-- 7. book_recommendations (id, user_id, title, author, reason, status, created_date)
+-- 8. notifications (id, user_id, type, message, sent_status, retry_count, created_at)
+```
+
+**Constraints:**
+- Check constraint: school_students cannot borrow reference_only books
+- Check constraint: sub_category must be valid for main_category
+- Foreign keys with ON DELETE RESTRICT
+- Indexes: books(main_category, sub_category), users(role), loans(due_date), books(isbn)
+
+---
+
+### ARTIFACT 3: JPA Entity Classes
+**Filenames:** `User.java`, `Book.java`, `Loan.java`, `Reservation.java`, `Fine.java`, `AuditLog.java`, `BookRecommendation.java`, `Notification.java`
+
+**Requirements:**
+- Use @Entity, @Table, @Id (UUID), @GeneratedValue
+- Use @Enumerated(EnumType.STRING) for enums
+- Use @ManyToOne, @OneToMany relationships
+- Include Lombok annotations: @Data, @Builder, @NoArgsConstructor, @AllArgsConstructor
+- Add validation annotations: @NotNull, @Size, @Email, @Pattern
+
+---
+
+### ARTIFACT 4: Spring Security Configuration
+**Filenames:** 
+- `SecurityConfig.java` (HttpSecurity configuration, role hierarchy)
+- `JwtAuthenticationFilter.java` (JWT validation)
+- `UserDetailsServiceImpl.java` (load user by email)
+- `JwtUtil.java` (generate/validate tokens)
+
+**Role Hierarchy:**
+```
+ROLE_ADMIN > ROLE_LIBRARIAN > ROLE_FACULTY > ROLE_COLLEGE_STUDENT > ROLE_SCHOOL_STUDENT > ROLE_GENERAL_PATRON
+```
+
+**Endpoint Security Rules:**
+```java
+/api/admin/** → ADMIN only
+/api/librarian/** → LIBRARIAN, ADMIN
+/api/faculty/** → FACULTY, LIBRARIAN, ADMIN
+/api/college/** → COLLEGE_STUDENT, FACULTY, LIBRARIAN, ADMIN
+/api/school/** → SCHOOL_STUDENT, FACULTY, LIBRARIAN, ADMIN
+/api/books/search → authenticated users (all roles)
+/api/auth/** → permitAll
+```
+
+---
+
+### ARTIFACT 5: Spring Boot REST Controllers
+**Filenames:** 
+- `AuthController.java`
+- `BookController.java`
+- `LoanController.java`
+- `ReservationController.java`
+- `ReportController.java`
+- `RecommendationController.java`
+- `CategoryController.java`
+
+**Endpoints Required:**
+
+| Method | Endpoint | Role | Description |
+|--------|----------|------|-------------|
+| POST | /api/auth/register | Public | Role-specific registration |
+| POST | /api/auth/login | Public | Returns JWT |
+| GET | /api/books/search | Authenticated | Search with filters |
+| GET | /api/books/categories | Authenticated | Return category tree |
+| GET | /api/books/category/{main}/subcategories | Authenticated | Get subcategories |
+| POST | /api/librarian/books | LIBRARIAN | Add book with validation |
+| PUT | /api/librarian/books/{id} | LIBRARIAN | Update book |
+| DELETE | /api/librarian/books/{id} | LIBRARIAN | Soft delete |
+| POST | /api/loans/checkout | LIBRARIAN | Checkout book |
+| POST | /api/loans/{id}/return | LIBRARIAN | Return book |
+| POST | /api/loans/{id}/renew | Authenticated | Renew loan (role limits) |
+| GET | /api/loans/my | Authenticated | View my loans |
+| POST | /api/reservations | Authenticated | Place hold |
+| DELETE | /api/reservations/{id} | Authenticated | Cancel hold |
+| GET | /api/reports/circulation-by-category | LIBRARIAN | Stats by category |
+| GET | /api/reports/overdue | LIBRARIAN | Overdue list |
+| POST | /api/recommendations | FACULTY | Recommend book |
+| GET | /api/recommendations/pending | LIBRARIAN | View recommendations |
+| POST | /api/admin/users/{id}/role | ADMIN | Change user role |
+
+**Use @PreAuthorize for method-level security.**
+
+---
+
+### ARTIFACT 6: Service Layer with Business Rules
+**Filenames:**
+- `LoanService.java`
+- `BookService.java`
+- `UserService.java`
+- `FineCalculatorService.java`
+- `CategoryValidationService.java`
+- `NotificationService.java`
+- `ReservationService.java`
+
+**Business Rules to Implement:**
+```java
+// LoanService.checkout()
+- Enforce max loans per role (5/3/10/4)
+- School students cannot borrow is_reference_only=true
+- Check if user has overdue fines > $10
+
+// LoanService.calculateDueDate()
+- College: 21 days, School: 14 days, Faculty: 30 days, General: 21 days
+
+// FineCalculatorService.calculateFine()
+- $0.50 per day overdue
+- Max fine = $50 (replacement cost)
+- No fine for faculty if overdue < 7 days
+
+// LoanService.renew()
+- Check renewal count limit
+- School student: send email to parent_email with approval link
+- Cannot renew if book has active reservation
+
+// ReservationService.autoAssignHold()
+- When book returned, assign to next in queue
+- Hold expires in 3 days
+- Send notification when available
+
+// CategoryValidationService.validate()
+- Ensure subcategory belongs to main category
+- Throw InvalidCategoryException if invalid
+```
+
+---
+
+### ARTIFACT 7: OpenAPI 3.0 Specification (YAML)
+**Filename:** `openapi.yaml`
+
+**Content:**
+- All endpoints from Artifact 5
+- Schemas: Book, User, Loan, Reservation, Fine, CategoryNode
+- Security scheme: JWT Bearer
+- Category tree response example:
+```yaml
+{
+  "categories": [
+    {
+      "main": "COMPETITIVE_EXAM",
+      "displayName": "Competitive Exams",
+      "subcategories": ["SSC", "UPSC", "CAT", "GATE", "NEET", "JEE", "BANKING", "RAILWAY", "OTHER_EXAM"]
+    },
+    {
+      "main": "COLLEGE",
+      "displayName": "College",
+      "subcategories": ["ENGINEERING", "MEDICAL", "COMMERCE", "ARTS", "LAW", "MANAGEMENT", "RESEARCH"]
+    }
+    // ... all 8 main categories with their subcategories
+  ]
+}
+```
+
+---
+
+### ARTIFACT 8: Repository Interfaces (Spring Data JPA)
+**Filenames:**
+- `BookRepository.java`
+- `UserRepository.java`
+- `LoanRepository.java`
+- `ReservationRepository.java`
+- `FineRepository.java`
+- `AuditLogRepository.java`
+
+**Custom Queries:**
+```java
+// BookRepository
+List<Book> findByMainCategoryAndAvailableCopiesGreaterThan(MainCategory main, int copies);
+Page<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(String title, String author, Pageable pageable);
+@Query("SELECT b.mainCategory, COUNT(l) FROM Loan l JOIN l.book b GROUP BY b.mainCategory")
+List<Object[]> getCirculationStatsByCategory();
+
+// LoanRepository
+@Query("SELECT l FROM Loan l WHERE l.dueDate < CURRENT_DATE AND l.returnedDate IS NULL")
+List<Loan> findOverdueLoans();
+List<Loan> findByUserIdAndReturnedDateIsNull(UUID userId);
+
+// UserRepository
+Optional<User> findByEmail(String email);
+List<User> findByRole(UserRole role);
+```
+
+---
+
+### ARTIFACT 9: DTO Classes (Records)
+**Filenames:** 
+- `BookRequestDTO.java`, `BookResponseDTO.java`
+- `LoanRequestDTO.java`, `LoanResponseDTO.java`
+- `UserRegistrationDTO.java` (role-specific fields)
+- `LoginRequestDTO.java`, `LoginResponseDTO.java`
+- `CategoryDTO.java`, `SubCategoryDTO.java`
+- `ReportDTO.java`
+
+**Use Java 17 records:**
+```java
+public record BookRequestDTO(
+    @NotBlank String title,
+    @NotBlank String author,
+    String isbn,
+    @NotNull MainCategory mainCategory,
+    @NotNull String subCategory,
+    int totalCopies,
+    boolean isReferenceOnly
+) {}
+```
+
+---
+
+### ARTIFACT 10: Exception Handling
+**Filename:** `GlobalExceptionHandler.java`
+
+**Exceptions to handle:**
+- `InvalidCategoryException` → 400 Bad Request
+- `BorrowingLimitExceededException` → 403 Forbidden
+- `BookNotAvailableException` → 409 Conflict
+- `OverdueFineException` → 400 Bad Request
+- `ParentApprovalRequiredException` → 202 Accepted (with approval link)
+- `ResourceNotFoundException` → 404 Not Found
+- `AccessDeniedException` → 403 Forbidden
+
+**Return consistent error response:**
+```json
+{
+  "timestamp": "2024-01-15T10:30:00",
+  "status": 400,
+  "error": "Invalid Category",
+  "message": "Subcategory 'SSC' is not valid for main category 'COMIC'",
+  "path": "/api/librarian/books"
+}
+```
+
+---
+
+### ARTIFACT 11: Database Seed Data (CommandLineRunner)
+**Filename:** `DataSeeder.java` or `data.sql`
+
+**Sample data to insert:**
+
+**Users:**
+```sql
+-- Admin: admin@example.com / Admin@123
+-- Librarian: librarian@example.com / Lib@123
+-- College Student: college@example.com / Student@123 (college: IIT Delhi)
+-- School Student: school@example.com / Student@123 (grade: GRADE_9_10, parent: parent@example.com)
+-- Faculty: faculty@example.com / Faculty@123 (college: IIT Delhi)
+-- General Patron: patron@example.com / Patron@123
+```
+
+**Books (at least 20 books covering ALL categories):**
+```sql
+-- Competitive Exam: "Quantitative Aptitude for CAT" (CAT), "General Studies for UPSC Prelims" (UPSC), "SSC CGL Tier 1 Guide" (SSC)
+-- College: "Engineering Mathematics" (ENGINEERING), "Robbins Pathology" (MEDICAL)
+-- School: "NCERT Class 10 Science" (GRADE_9_10)
+-- Comic: "The Dark Knight Returns" (SUPERHERO), "Death Note Vol 1" (MANGA)
+-- History: "The Rise and Fall of Roman Empire" (ANCIENT), "India After Gandhi" (MODERN)
+-- Non-Fiction: "Sapiens" (SCIENCE), "Atomic Habits" (SELF_HELP)
+-- Fiction: "Dune" (SCI_FI), "Pride and Prejudice" (LITERARY)
+-- Other: "National Geographic Magazine" (MAGAZINE)
+```
+
+**Loans:** Mix of active, returned, and overdue loans for testing.
+
+---
+
+### ARTIFACT 12: Unit and Integration Tests
+**Filenames:**
+- `LoanServiceTest.java` (Unit tests)
+- `CategoryValidationServiceTest.java`
+- `BookControllerIntegrationTest.java` (with MockMvc)
+- `SecurityConfigTest.java`
+- `FineCalculatorServiceTest.java`
+
+**Test cases to include:**
+```java
+// Category validation tests
+@Test
+void shouldAcceptValidSubcategory_SSC_Under_COMPETITIVE_EXAM()
+@Test
+void shouldRejectInvalidSubcategory_SSC_Under_COMICS()
+
+// Borrowing limit tests
+@Test
+void shouldRejectCheckout_WhenCollegeStudentHas5ActiveLoans()
+@Test
+void shouldAllowCheckout_WhenSchoolStudentBorrowsNonReferenceBook()
+@Test
+void shouldRejectCheckout_WhenSchoolStudentBorrowsReferenceOnlyBook()
+
+// Fine calculation tests
+@Test
+void shouldCalculateFine_50CentsPerDay_ForCollegeStudent()
+@Test
+void shouldWaiveFine_ForFacultyUnder7Days()
+
+// Renewal tests
+@Test
+void shouldSendParentApprovalEmail_WhenSchoolStudentRenews()
+@Test
+void shouldAllowFacultyToRenewTwice()
+@Test
+void shouldRejectRenewal_WhenBookHasActiveReservation()
+
+// Security tests
+@Test
+void shouldReturn401_WhenAccessingAdminEndpointWithoutToken()
+@Test
+void shouldReturn403_WhenCollegeStudentAccessesLibrarianEndpoint()
+```
+
+**Use @TestContainers for PostgreSQL integration tests.**
+
+---
+
+### ARTIFACT 13: Maven pom.xml
+**Filename:** `pom.xml`
+
+**Dependencies required:**
+```xml
+<dependencies>
+    <!-- Spring Boot Starters -->
+    spring-boot-starter-web
+    spring-boot-starter-data-jpa
+    spring-boot-starter-security
+    spring-boot-starter-validation
+    spring-boot-starter-mail
+    
+    <!-- JWT -->
+    jjwt-api, jjwt-impl, jjwt-jackson
+    
+    <!-- Database -->
+    postgresql
+    
+    <!-- Lombok -->
+    lombok
+    
+    <!-- Testing -->
+    spring-boot-starter-test
+    spring-security-test
+    testcontainers (postgresql, junit-jupiter)
+    
+    <!-- Utilities -->
+    commons-validator (email validation)
+</dependencies>
+```
+
+---
+
+### ARTIFACT 14: Application Properties
+**Filename:** `application.yml` (or `application.properties`)
+
+**Content:**
+```yaml
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/liberey_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:yourSecretKeyHereAtLeast32CharactersLong}
+    expiration: 86400000  # 24 hours
+  fine:
+    rate-per-day: 0.50
+    max-fine: 50.00
+  borrowing:
+    college:
+      max-books: 5
+      loan-days: 21
+      renewals: 1
+    school:
+      max-books: 3
+      loan-days: 14
+      renewals: 1
+    faculty:
+      max-books: 10
+      loan-days: 30
+      renewals: 2
+    general:
+      max-books: 4
+      loan-days: 21
+      renewals: 1
+```
+
+---
+
+### ARTIFACT 15: Category Validation Utility Class
+**Filename:** `com/lms/util/CategoryValidator.java`
+
+**Content:**
+```java
+public class CategoryValidator {
+    private static final Map<MainCategory, Set<String>> VALID_SUBCATEGORIES = Map.of(
+        MainCategory.COMPETITIVE_EXAM, Set.of("SSC", "UPSC", "CAT", "GATE", "NEET", "JEE", "BANKING", "RAILWAY", "OTHER_EXAM"),
+        MainCategory.COLLEGE, Set.of("ENGINEERING", "MEDICAL", "COMMERCE", "ARTS", "LAW", "MANAGEMENT", "RESEARCH"),
+        MainCategory.SCHOOL, Set.of("K_5", "GRADE_6_8", "GRADE_9_10", "GRADE_11_12"),
+        MainCategory.COMIC, Set.of("SUPERHERO", "MANGA", "GRAPHIC_NOVEL", "HUMOR"),
+        MainCategory.HISTORY, Set.of("ANCIENT", "MEDIEVAL", "MODERN", "WORLD", "REGIONAL"),
+        MainCategory.NON_FICTION, Set.of("BIOGRAPHY", "SCIENCE", "SELF_HELP", "TRAVEL", "BUSINESS", "HEALTH"),
+        MainCategory.FICTION, Set.of("LITERARY", "SCI_FI", "FANTASY", "MYSTERY", "ROMANCE", "HORROR"),
+        MainCategory.OTHER, Set.of("MAGAZINE", "JOURNAL", "REFERENCE", "AUDIOBOOK")
+    );
+    
+    public static void validate(MainCategory main, String subcategory) {
+        if (!VALID_SUBCATEGORIES.getOrDefault(main, Set.of()).contains(subcategory)) {
+            throw new InvalidCategoryException("Subcategory '" + subcategory + 
+                "' is not valid for main category '" + main + "'");
+        }
+    }
+    
+    public static Set<String> getSubcategories(MainCategory main) {
+        return VALID_SUBCATEGORIES.getOrDefault(main, Set.of());
+    }
+}
+```
+
+---
+
+### ARTIFACT 16: GitHub Actions CI/CD Pipeline
+**Filename:** `.github/workflows/ci-cd.yml`
+
+**Content:**
+```yaml
+name: LMS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger for deployment
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: liberey_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      - name: Run tests
+        run: mvn clean test
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/liberey_test
+          DB_USER: test
+          DB_PASSWORD: test
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+
+  sonar-analysis:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v3
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@master
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add your deployment script (Heroku, AWS ECS, etc.)
+```
+
+---
+
+### ARTIFACT 17: Complete README.md
+**Filename:** `README.md`
+
+**Sections required:**
+1. Project Title and Description
+2. Technology Stack
+3. **Category Reference Table** (complete hierarchy from prompt)
+4. **Role-Based Access Matrix** (permissions, limits from prompt)
+5. Setup Instructions (clone, DB setup, environment variables, run)
+6. API Documentation (link to OpenAPI)
+7. Sample API Calls (curl examples for each role)
+8. Parent Approval Flow (for school students)
+9. Testing Guide (how to run unit/integration tests)
+10. Deployment Instructions
+11. **Validation Matrix:**
+   - Each endpoint mapped to required role
+   - Each category-subcategory pair validated
+   - Borrowing limits per role
+12. Known Limitations and Future Enhancements
+
+---
+
+## CONSTRAINTS & RULES (MUST FOLLOW)
+
+1. **No real secrets:** Use environment variables or placeholders (`${JWT_SECRET}`)
+2. **Java 17 features:** Use records for DTOs, var, switch expressions
+3. **Spring Boot best practices:** Constructor injection, interface-based service layer
+4. **Complete category coverage:** All 8 main categories and ALL subcategories listed must be valid
+5. **Validation exhaustive:** Any invalid category-subcategory pair must throw exception
+6. **Role-based enforcement:** All endpoints must check roles via @PreAuthorize
+7. **Idempotent output:** Running the prompt multiple times produces consistent artifacts
+8. **Syntactically correct:** Valid Java, SQL, YAML, XML, JSON
+9. **Comments:** Add comments explaining complex business rules (parent approval, fine calculation, hold queues)
+10. **Test coverage:** Minimum 80% coverage for service layer (implied in test artifacts)
+
+## EXPECTED OUTPUT FORMAT
+
+Start each artifact with:
+```
+=== ARTIFACT 1: BookCategory.java ===
+[code content]
+
+=== ARTIFACT 2: schema.sql ===
+[SQL content]
+
+... continue through ARTIFACT 17
+```
+
+Generate ALL 17 artifacts now. Ensure competitive exam books (SSC, UPSC, CAT, etc.) are properly categorized and role-based access respects all borrowing limits defined above.
+```
+
+---
+
+## Deliverables Summary
+
+| Artifact | Description |
+|----------|-------------|
+| 1 | BookCategory.java - Complete enum hierarchy |
+| 2 | schema.sql - PostgreSQL DDL with constraints |
+| 3 | JPA Entities (8 classes) |
+| 4 | Spring Security (4 classes) |
+| 5 | REST Controllers (7 classes) |
+| 6 | Service Layer (7 classes with business rules) |
+| 7 | OpenAPI 3.0 YAML spec |
+| 8 | Repository Interfaces (6 interfaces) |
+| 9 | DTO Records (7 records) |
+| 10 | Global Exception Handler |
+| 11 | Database Seeder (20+ books, 6 users) |
+| 12 | Unit & Integration Tests (5 test classes) |
+| 13 | pom.xml with all dependencies |
+| 14 | application.yml configuration |
+| 15 | CategoryValidator utility |
+| 16 | GitHub Actions CI/CD |
+| 17 | Complete README |
+
+---
+
+## Next Step After Generation
+
+> **Copy the generated code into IntelliJ IDEA. Run `mvn clean install`. Execute PostgreSQL and update `application.yml` with your DB credentials. Run `mvn spring-boot:run`. Test the category endpoint: `curl http://localhost:8080/api/books/categories` to verify all 8 main categories and their subcategories return correctly.**
