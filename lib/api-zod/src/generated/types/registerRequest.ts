@@ -15,9 +15,13 @@ export interface RegisterRequest {
   phone?: string | null;
   role: RegisterRequestRole;
   /** @nullable */
+  studentId?: string | null;
+  /** @nullable */
   collegeName?: string | null;
   /** @nullable */
   schoolGrade?: string | null;
   /** @nullable */
   parentEmail?: string | null;
+  /** @nullable */
+  membershipExpiry?: Date | null;
 }

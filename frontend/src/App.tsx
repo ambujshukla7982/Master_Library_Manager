@@ -49,6 +49,9 @@ function HomeRedirect() {
   return <Redirect to="/books" />;
 }
 
+import ReadingHistoryPage from "@/pages/reading-history";
+import LeaderboardPage from "@/pages/leaderboard";
+
 function AppRouter() {
   return (
     <Switch>
@@ -70,15 +73,23 @@ function AppRouter() {
       </Route>
 
       <Route path="/books">
-        <ProtectedRoute>
-          <AppLayout><BooksPage /></AppLayout>
-        </ProtectedRoute>
+        <AppLayout><BooksPage /></AppLayout>
       </Route>
 
       <Route path="/loans">
         <ProtectedRoute>
           <AppLayout><MyLoansPage /></AppLayout>
         </ProtectedRoute>
+      </Route>
+
+      <Route path="/reading-history">
+        <ProtectedRoute>
+          <AppLayout><ReadingHistoryPage /></AppLayout>
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/leaderboard">
+        <AppLayout><LeaderboardPage /></AppLayout>
       </Route>
 
       <Route path="/reservations">
@@ -151,6 +162,7 @@ function AppRouter() {
     </Switch>
   );
 }
+
 
 function App() {
   return (

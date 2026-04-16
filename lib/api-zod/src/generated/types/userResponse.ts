@@ -14,6 +14,8 @@ export interface UserResponse {
   phone?: string | null;
   role: string;
   /** @nullable */
+  studentId?: string | null;
+  /** @nullable */
   collegeName?: string | null;
   /** @nullable */
   schoolGrade?: string | null;

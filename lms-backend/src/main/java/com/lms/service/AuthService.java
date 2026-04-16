@@ -53,27 +53,36 @@ public class AuthService {
     }
 
     public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already registered: " + request.email());
-        }
-        UserRole role;
         try {
-            role = UserRole.valueOf(request.role());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid role: " + request.role());
+            if (userRepository.existsByEmail(request.email())) {
+                throw new IllegalArgumentException("Email already registered: " + request.email());
+            }
+            UserRole role;
+            try {
+                String roleStr = request.role().toUpperCase();
+                if (!roleStr.startsWith("ROLE_")) {
+                    roleStr = "ROLE_" + roleStr;
+                }
+                role = UserRole.valueOf(roleStr);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid role: " + request.role() + ". Available roles are: ADMIN, LIBRARIAN, FACULTY, COLLEGE_STUDENT, SCHOOL_STUDENT, GENERAL_PATRON, STUDENT, MEMBER");
+            }
+            User user = User.builder()
+                .email(request.email())
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .name(request.name())
+                .phone(request.phone())
+                .role(role)
+                .studentId(request.studentId())
+                .collegeName(request.collegeName())
+                .schoolGrade(request.schoolGrade())
+                .parentEmail(request.parentEmail())
+                .membershipExpiry(request.membershipExpiry())
+                .build();
+            return UserResponse.from(userRepository.save(user));
+        } catch (Exception e) {
+            e.printStackTrace(); // Log to console for debugging
+            throw e;
         }
-        User user = User.builder()
-            .email(request.email())
-            .passwordHash(passwordEncoder.encode(request.password()))
-            .name(request.name())
-            .phone(request.phone())
-            .role(role)
-            .studentId(request.studentId())
-            .collegeName(request.collegeName())
-            .schoolGrade(request.schoolGrade())
-            .parentEmail(request.parentEmail())
-            .membershipExpiry(request.membershipExpiry())
-            .build();
-        return UserResponse.from(userRepository.save(user));
     }
 }

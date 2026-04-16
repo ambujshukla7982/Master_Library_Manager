@@ -16,8 +16,8 @@ import java.util.List;
 @Entity
 @Table(name = "users", indexes = {
     @Index(name = "idx_users_role", columnList = "role"),
-    @Index(name = "idx_users_student_id", columnList = "studentId"),
-    @Index(name = "idx_users_is_active", columnList = "isActive")
+    @Index(name = "idx_users_student_id", columnList = "student_id"),
+    @Index(name = "idx_users_is_active", columnList = "is_active")
 })
 @Data
 @Builder

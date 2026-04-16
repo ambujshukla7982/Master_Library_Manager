@@ -44,6 +44,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/healthz").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/books/**").permitAll()
+                .requestMatchers("/analytics/leaderboard").permitAll()
 
                 // Admin only
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")

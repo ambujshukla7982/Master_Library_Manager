@@ -100,7 +100,6 @@ com\lms\dto\ReservationResponse.class
 com\lms\service\RecommendationService.class
 com\lms\repository\LoanRepository.class
 com\lms\model\Loan$LoanBuilder.class
-com\lms\exception\GlobalExceptionHandler.class
 com\lms\controller\ReservationController.class
 com\lms\service\CategoryService.class
 com\lms\controller\ReportController.class

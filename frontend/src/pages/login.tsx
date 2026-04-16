@@ -34,7 +34,9 @@ export default function LoginPage() {
         navigate("/dashboard");
       },
       onError: (err: any) => {
-        toast({ title: "Login failed", description: err?.data?.message ?? "Invalid email or password", variant: "destructive" });
+        const msg = err?.data?.message || err?.message || "Invalid email or password";
+        const type = err?.data?.error ? ` (${err.data.error})` : "";
+        toast({ title: "Login failed" + type, description: msg, variant: "destructive" });
       },
     },
   });

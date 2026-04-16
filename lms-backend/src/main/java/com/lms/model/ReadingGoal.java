@@ -25,7 +25,7 @@ public class ReadingGoal {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "`year`", nullable = false)
     private Integer year;
 
     @Column(nullable = false)

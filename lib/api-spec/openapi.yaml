@@ -643,6 +643,8 @@ components:
       properties:
         token:
           type: string
+        refreshToken:
+          type: string
         email:
           type: string
         name:
@@ -653,6 +655,7 @@ components:
           type: integer
       required:
         - token
+        - refreshToken
         - email
         - name
         - role
@@ -672,13 +675,18 @@ components:
           type: ["string", "null"]
         role:
           type: string
-          enum: [ROLE_ADMIN, ROLE_LIBRARIAN, ROLE_FACULTY, ROLE_COLLEGE_STUDENT, ROLE_SCHOOL_STUDENT, ROLE_GENERAL_PATRON]
+          enum: [ROLE_ADMIN, ROLE_LIBRARIAN, ROLE_FACULTY, ROLE_COLLEGE_STUDENT, ROLE_SCHOOL_STUDENT, ROLE_GENERAL_PATRON, ROLE_STUDENT, ROLE_MEMBER]
+        studentId:
+          type: ["string", "null"]
         collegeName:
           type: ["string", "null"]
         schoolGrade:
           type: ["string", "null"]
         parentEmail:
           type: ["string", "null"]
+        membershipExpiry:
+          type: ["string", "null"]
+          format: date
       required:
         - email
         - password
@@ -698,6 +706,8 @@ components:
           type: ["string", "null"]
         role:
           type: string
+        studentId:
+          type: ["string", "null"]
         collegeName:
           type: ["string", "null"]
         schoolGrade:
@@ -725,7 +735,7 @@ components:
           type: ["string", "null"]
         mainCategory:
           type: string
-          enum: [COMPETITIVE_EXAM, COLLEGE, SCHOOL, COMIC, HISTORY, NON_FICTION, FICTION, OTHER]
+          enum: [COMPETITIVE_EXAM, COLLEGE, SCHOOL, COMIC, HISTORY, NON_FICTION, FICTION, OTHER, TECHNOLOGY, SCIENCE, ARTS, PHILOSOPHY, LITERATURE, BIOGRAPHY, GEOGRAPHY, LAW, BUSINESS, MEDICINE, TRAVEL, REFERENCE]
         subCategory:
           type: string
         publicationYear:
@@ -1056,7 +1066,7 @@ components:
       properties:
         role:
           type: string
-          enum: [ROLE_ADMIN, ROLE_LIBRARIAN, ROLE_FACULTY, ROLE_COLLEGE_STUDENT, ROLE_SCHOOL_STUDENT, ROLE_GENERAL_PATRON]
+          enum: [ROLE_ADMIN, ROLE_LIBRARIAN, ROLE_FACULTY, ROLE_COLLEGE_STUDENT, ROLE_SCHOOL_STUDENT, ROLE_GENERAL_PATRON, ROLE_STUDENT, ROLE_MEMBER]
       required:
         - role
 

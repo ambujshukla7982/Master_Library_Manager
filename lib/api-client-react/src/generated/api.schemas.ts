@@ -17,6 +17,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  refreshToken: string;
   email: string;
   name: string;
   role: string;
@@ -33,6 +34,8 @@ export const RegisterRequestRole = {
   ROLE_COLLEGE_STUDENT: "ROLE_COLLEGE_STUDENT",
   ROLE_SCHOOL_STUDENT: "ROLE_SCHOOL_STUDENT",
   ROLE_GENERAL_PATRON: "ROLE_GENERAL_PATRON",
+  ROLE_STUDENT: "ROLE_STUDENT",
+  ROLE_MEMBER: "ROLE_MEMBER",
 } as const;
 
 export interface RegisterRequest {
@@ -43,11 +46,15 @@ export interface RegisterRequest {
   phone?: string | null;
   role: RegisterRequestRole;
   /** @nullable */
+  studentId?: string | null;
+  /** @nullable */
   collegeName?: string | null;
   /** @nullable */
   schoolGrade?: string | null;
   /** @nullable */
   parentEmail?: string | null;
+  /** @nullable */
+  membershipExpiry?: string | null;
 }
 
 export interface UserResponse {
@@ -57,6 +64,8 @@ export interface UserResponse {
   /** @nullable */
   phone?: string | null;
   role: string;
+  /** @nullable */
+  studentId?: string | null;
   /** @nullable */
   collegeName?: string | null;
   /** @nullable */
@@ -77,6 +86,18 @@ export const BookRequestMainCategory = {
   NON_FICTION: "NON_FICTION",
   FICTION: "FICTION",
   OTHER: "OTHER",
+  TECHNOLOGY: "TECHNOLOGY",
+  SCIENCE: "SCIENCE",
+  ARTS: "ARTS",
+  PHILOSOPHY: "PHILOSOPHY",
+  LITERATURE: "LITERATURE",
+  BIOGRAPHY: "BIOGRAPHY",
+  GEOGRAPHY: "GEOGRAPHY",
+  LAW: "LAW",
+  BUSINESS: "BUSINESS",
+  MEDICINE: "MEDICINE",
+  TRAVEL: "TRAVEL",
+  REFERENCE: "REFERENCE",
 } as const;
 
 export interface BookRequest {
@@ -264,6 +285,8 @@ export const ChangeRoleRequestRole = {
   ROLE_COLLEGE_STUDENT: "ROLE_COLLEGE_STUDENT",
   ROLE_SCHOOL_STUDENT: "ROLE_SCHOOL_STUDENT",
   ROLE_GENERAL_PATRON: "ROLE_GENERAL_PATRON",
+  ROLE_STUDENT: "ROLE_STUDENT",
+  ROLE_MEMBER: "ROLE_MEMBER",
 } as const;
 
 export interface ChangeRoleRequest {

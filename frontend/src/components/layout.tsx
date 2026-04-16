@@ -8,7 +8,8 @@ import {
   BookOpen, LayoutDashboard, Library, BookMarked,
   ClipboardList, Users, BarChart2, LogOut,
   Menu, X, Star, AlertCircle, BookPlus, ChevronRight,
-  Bell, Armchair, UserCircle, Activity, ScrollText
+  Bell, Armchair, UserCircle, Activity, ScrollText,
+  History as HistoryIcon, Trophy, Home
 } from "lucide-react";
 
 interface NavItem {
@@ -19,11 +20,14 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { label: "Home", path: "/", icon: Home },
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["ROLE_ADMIN", "ROLE_LIBRARIAN"] },
   { label: "Book Catalog", path: "/books", icon: Library },
-  { label: "My Loans", path: "/loans", icon: BookMarked, roles: ["ROLE_COLLEGE_STUDENT", "ROLE_SCHOOL_STUDENT", "ROLE_FACULTY", "ROLE_GENERAL_PATRON", "ROLE_STUDENT", "ROLE_MEMBER"] },
-  { label: "My Reservations", path: "/reservations", icon: ClipboardList, roles: ["ROLE_COLLEGE_STUDENT", "ROLE_SCHOOL_STUDENT", "ROLE_FACULTY", "ROLE_GENERAL_PATRON", "ROLE_STUDENT", "ROLE_MEMBER"] },
+  { label: "My Loans", path: "/loans", icon: BookMarked, roles: ["ROLE_COLLEGE_STUDENT", "ROLE_SCHOOL_STUDENT", "ROLE_FACULTY", "ROLE_GENERAL_PATRON", "ROLE_STUDENT", "ROLE_MEMBER", "ROLE_ADMIN", "ROLE_LIBRARIAN"] },
+  { label: "My Reservations", path: "/reservations", icon: ClipboardList, roles: ["ROLE_COLLEGE_STUDENT", "ROLE_SCHOOL_STUDENT", "ROLE_FACULTY", "ROLE_GENERAL_PATRON", "ROLE_STUDENT", "ROLE_MEMBER", "ROLE_ADMIN", "ROLE_LIBRARIAN"] },
+  { label: "Reading History", path: "/reading-history", icon: HistoryIcon, roles: ["ROLE_COLLEGE_STUDENT", "ROLE_SCHOOL_STUDENT", "ROLE_FACULTY", "ROLE_GENERAL_PATRON", "ROLE_STUDENT", "ROLE_MEMBER", "ROLE_ADMIN", "ROLE_LIBRARIAN"] },
   { label: "Seat Booking", path: "/seat-booking", icon: Armchair },
+  { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
   { label: "Manage Loans", path: "/manage-loans", icon: BookPlus, roles: ["ROLE_ADMIN", "ROLE_LIBRARIAN"] },
   { label: "Overdue Loans", path: "/overdue", icon: AlertCircle, roles: ["ROLE_ADMIN", "ROLE_LIBRARIAN"] },
   { label: "All Reservations", path: "/manage-reservations", icon: ClipboardList, roles: ["ROLE_ADMIN", "ROLE_LIBRARIAN"] },

@@ -49,6 +49,7 @@ public class AnalyticsService {
                 entry.put("userId", user.getId());
                 entry.put("name", user.getName());
                 entry.put("email", user.getEmail());
+                entry.put("role", user.getRole().name());
                 entry.put("booksRead", count);
                 activeMembers.add(entry);
             });

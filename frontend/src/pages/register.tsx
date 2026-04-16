@@ -34,7 +34,9 @@ export default function RegisterPage() {
         loginMutation.mutate({ data: { email, password } });
       },
       onError: (err: any) => {
-        toast({ title: "Registration failed", description: err?.data?.message ?? "Could not create account", variant: "destructive" });
+        const msg = err?.data?.message || err?.message || "Could not create account";
+        const type = err?.data?.error ? ` (${err.data.error})` : "";
+        toast({ title: "Registration failed" + type, description: msg, variant: "destructive" });
       },
     },
   });
@@ -66,7 +68,15 @@ export default function RegisterPage() {
       return;
     }
     registerMutation.mutate({
-      data: { name, email, password, role: role as any, phone: phone || undefined } as any,
+      data: { 
+        name, 
+        email, 
+        password, 
+        role: role as any, 
+        phone: phone || undefined,
+        studentId: studentId || undefined,
+        collegeName: isStudentRole ? "Default College" : undefined // Add a default if needed or capture in form
+      } as any,
     });
   };
 
