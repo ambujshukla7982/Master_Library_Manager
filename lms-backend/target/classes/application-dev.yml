@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:lmsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./data/lmsdb
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -10,8 +10,8 @@ spring:
       path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
